@@ -1,5 +1,4 @@
 import chromadb
-import os
 
 # Usar modo persistente para que puedas ver los archivos en ./chroma_db
 client = chromadb.PersistentClient(path="./chroma_db")
@@ -28,7 +27,27 @@ print("\nConsulta por ID:")
 print(result)
 
 # Buscar por texto
-query_result = collection.query(query_texts=["Hello"], n_results=1)
+query_text = "Hello world" 
+query_result = collection.query(query_texts=[query_text], n_results=3)
 print("\nBúsqueda por texto:")
 print(query_result)
 
+
+docs = query_result.get("documents")
+ids = query_result.get("ids")
+distances = query_result.get("distances")
+
+if docs and docs[0] and ids and ids[0] and distances and distances[0]:
+    print("\nenumerate(docs[0])", enumerate(docs[0]))
+    for idx, document in enumerate(docs[0]):
+        doc_id = ids[0][idx]
+        distance = distances[0][idx]
+        print(
+            f"\nPara la consulta: '{query_text}',\n"
+            f"Documento similar encontrado:\n"
+            f"  ID: {doc_id}\n"
+            f"  Texto: {document}\n"
+            f"  Distancia semántica: {distance}\n"
+        )
+else:
+    print("\nNo se encontraron resultados válidos para la consulta.")
