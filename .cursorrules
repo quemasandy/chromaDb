@@ -1,1 +1,23 @@
-Always give comments for each line of code explaining what this line of code does and what is the effect on the project
+# Objetivos para aprender a usar ChromaDB:
+# 1. Instalación y configuración básica: Instalar y configurar ChromaDB en el entorno local o en la nube.
+# 2. Conceptos fundamentales: Entender colecciones, documentos y metadatos en ChromaDB.
+# 3. Operaciones CRUD: Practicar la creación, lectura, actualización y eliminación de documentos.
+# 4. Búsqueda semántica: Realizar búsquedas por similitud usando embeddings.
+# 5. Integración con modelos de lenguaje: Integrar ChromaDB con modelos para generar embeddings.
+# 6. Filtrado y metadatos: Usar metadatos para filtrar y organizar información.
+# 7. Escalabilidad y rendimiento: Investigar cómo escalar y medir el rendimiento de ChromaDB.
+# 8. Casos de uso prácticos: Implementar buscadores, sistemas de recomendación y chatbots.
+# 9. Automatización y scripts: Automatizar la carga y consulta de datos con scripts.
+# 10. Explorar la documentación oficial: Leer la documentación y ejemplos de la API.
+# Reglas adicionales para el desarrollo con ChromaDB:
+# 11. Comentarios explicativos: Siempre agregar comentarios para cada línea de código explicando qué hace esta línea y cuál es su efecto en el proyecto
+# 12. Documentación de funciones: Documentar todas las funciones con docstrings explicando parámetros, retornos y efectos secundarios
+# 13. Manejo de errores: Implementar try-catch blocks apropiados para operaciones de base de datos
+# 14. Logging estructurado: Usar logging para rastrear operaciones importantes y debugging
+# 15. Validación de datos: Validar inputs antes de procesarlos en ChromaDB
+# 16. Configuración centralizada: Mantener configuraciones de ChromaDB en archivos separados
+# 17. Testing unitario: Crear tests para cada operación CRUD y búsqueda
+# 18. Performance monitoring: Monitorear tiempos de respuesta y uso de memoria
+# 19. Backup y recuperación: Implementar estrategias de backup para datos críticos
+# 20. Seguridad: Validar y sanitizar todos los inputs para prevenir inyecciones
+# 21. Siempre dar comentarios para cada línea de código explicando qué hace esta línea de código y cuál es su efecto en el proyecto
