@@ -234,3 +234,9 @@ Thumbs.db
 # *.xml
 # *.xlsx
 # *.xls
+
+# ignore the db folder
+db/
+
+# ignore the vector-databases-course folder
+vector-databases-course/
