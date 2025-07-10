@@ -108,6 +108,71 @@ results_nin_filter = collection.query(
     }
 )
 
+# Paso 11: Función para actualizar un documento existente en la colección
+
+def update_document(collection, doc_id, new_text=None, new_metadata=None):
+    """
+    Actualiza el texto y/o los metadatos de un documento en la colección de ChromaDB.
+
+    Parámetros:
+        collection: Objeto de colección de ChromaDB donde se almacenan los documentos.
+        doc_id (str): ID único del documento a actualizar.
+        new_text (str, opcional): Nuevo texto para el documento. Si es None, no se actualiza el texto.
+        new_metadata (dict, opcional): Nuevos metadatos para el documento. Si es None, no se actualizan los metadatos.
+
+    Retorna:
+        dict: Resultado de la actualización o mensaje de error.
+    """
+    try:
+        # Paso 1: Consultar si el documento existe usando su ID
+        existing = collection.get(ids=[doc_id])  # Busca el documento por ID
+        if not existing["ids"] or len(existing["ids"]) == 0:
+            # Si la lista de IDs está vacía, el documento no existe
+            return {"error": f"Documento con ID '{doc_id}' no encontrado."}
+
+        # Paso 2: Preparar los nuevos valores para actualizar
+        updated_text = new_text if new_text is not None else existing["documents"][0]  # Usa el nuevo texto o el actual
+        updated_metadata = new_metadata if new_metadata is not None else existing["metadatas"][0]  # Usa los nuevos metadatos o los actuales
+
+        # Paso 3: Realizar la actualización usando el método update
+        collection.update(
+            ids=[doc_id],  # Lista con el ID a actualizar
+            documents=[updated_text],  # Lista con el nuevo texto
+            metadatas=[updated_metadata]  # Lista con los nuevos metadatos
+        )
+
+        # Paso 4: Consultar el documento actualizado para mostrar el resultado final
+        updated = collection.get(ids=[doc_id])
+        return {"success": True, "updated": updated}
+    except Exception as e:
+        # Manejo de errores: retorna el mensaje de la excepción
+        return {"error": str(e)}
+
+# Ejemplo de uso de la función update_document
+print("\n=== ACTUALIZANDO DOCUMENTO 'doc2' ===")
+# Mostrar el documento antes de la actualización
+print("Antes:")
+print(json.dumps(collection.get(ids=["doc2"]), indent=2, ensure_ascii=False))
+
+# Actualizar el texto y los metadatos del documento 'doc2'
+resultado_update = update_document(
+    collection,
+    doc_id="doc2",
+    new_text="ChromaDB avanzado y práctico",  # Nuevo texto para el documento
+    new_metadata={"categoria": "tutorial", "idioma": "español", "nivel": "avanzado"}  # Nuevos metadatos
+)
+
+# Mostrar el resultado de la actualización
+print("Después:")
+print(json.dumps(collection.get(ids=["doc2"]), indent=2, ensure_ascii=False))
+
+# Mostrar si hubo error o éxito
+if "error" in resultado_update:
+    print("Error al actualizar:", resultado_update["error"])
+else:
+    print("Actualización exitosa.")
+
+
 # Imprime los resultados de las diferentes consultas para comparar
 print("=== CONSULTA BÁSICA (sin filtros) ===")
 print(json.dumps(results_basic, indent=2, ensure_ascii=False))
