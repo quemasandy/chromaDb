@@ -1,0 +1,364 @@
+
+---
+alwaysApply: true
+description: "Reglas para escribir código Python pythonic sin errores de lint y evitando redundancias"
+globs: "*.py"
+---
+
+# Reglas de Código Python Pythonic
+
+## Principio Central: Código Pythonic y Sin Redundancias
+
+**El código debe ser pythonic, elegante y libre de redundancias innecesarias.**
+
+- **Pythonic**: Seguir las convenciones y idiomas naturales de Python
+- **DRY (Don't Repeat Yourself)**: Evitar duplicación de lógica y verificaciones
+- **KISS (Keep It Simple, Stupid)**: Mantener el código simple y directo
+- **Elegante**: Preferir soluciones claras y concisas sobre complejas
+
+## Principios Fundamentales
+
+### 1. **Manejo Seguro de Datos**
+- Siempre verificar si un valor puede ser `None` antes de acceder a sus elementos
+- Usar `try-except` para operaciones que pueden fallar
+- Verificar existencia de claves en diccionarios antes de acceder
+- Usar `if variable is not None:` en lugar de `if variable:`
+
+```python
+# ✅ Correcto
+if data is not None and data.get("key"):
+    value = data["key"]
+
+# ❌ Incorrecto
+value = data["key"]  # Puede ser None o no existir
+```
+
+### 2. **Funciones y Documentación**
+- Todas las funciones deben tener docstrings explicando parámetros y retornos
+- Usar nombres descriptivos para funciones y variables
+- Separar lógica compleja en funciones auxiliares
+- Una función debe hacer una sola cosa bien
+
+```python
+# ✅ Correcto
+def process_user_data(user_data: dict) -> dict:
+    """
+    Procesa y valida los datos del usuario.
+    
+    Args:
+        user_data: Diccionario con datos del usuario
+        
+    Returns:
+        Diccionario con datos procesados y validados
+    """
+```
+
+### 3. **Iteración y Comprensiones**
+- Usar `enumerate()` cuando necesites índices
+- Usar `zip()` para iterar sobre múltiples listas
+- Preferir comprensiones de lista sobre bucles cuando sea apropiado
+- Usar `all()` y `any()` para verificaciones múltiples
+
+```python
+# ✅ Correcto
+valid_items = [item for item in items if item.is_valid()]
+if all(item.is_ready() for item in items):
+    process_items(items)
+
+# ❌ Incorrecto
+valid_items = []
+for item in items:
+    if item.is_valid():
+        valid_items.append(item)
+```
+
+### 4. **Manejo de Excepciones**
+- Usar `try-except` específicos, no genéricos
+- Capturar excepciones específicas cuando sea posible
+- Usar `except Exception as e:` en lugar de `except:`
+- Logging de errores apropiado
+
+```python
+# ✅ Correcto
+try:
+    result = risky_operation()
+except (ValueError, TypeError) as e:
+    logger.error(f"Error en operación: {e}")
+    return None
+
+# ❌ Incorrecto
+try:
+    result = risky_operation()
+except:
+    pass
+```
+
+### 5. **Imports y Organización**
+- Eliminar imports no utilizados
+- Organizar imports: stdlib, third-party, local
+- Usar imports específicos cuando sea apropiado
+- No usar `import *`
+
+```python
+# ✅ Correcto
+import os
+from typing import Dict, List, Optional
+
+import requests
+from pandas import DataFrame
+
+from .utils import helper_function
+```
+
+### 6. **Tipos y Validación**
+- Usar type hints cuando sea apropiado
+- Validar inputs antes de procesarlos
+- Verificar tipos de datos antes de operaciones
+- Manejar casos edge apropiadamente
+
+```python
+# ✅ Correcto
+def calculate_average(numbers: List[float]) -> Optional[float]:
+    if not numbers:
+        return None
+    return sum(numbers) / len(numbers)
+```
+
+### 7. **Convenciones de Naming**
+- Variables y funciones: `snake_case`
+- Constantes: `UPPER_CASE`
+- Clases: `PascalCase`
+- Variables privadas: `_prefijo`
+- Módulos: `lowercase` o `snake_case`
+
+### 8. **Estructuras de Datos**
+- Usar las estructuras de datos apropiadas (list, dict, set, tuple)
+- Evitar mutación innecesaria
+- Usar comprehensions cuando mejoren la legibilidad
+- Preferir `defaultdict` sobre verificaciones manuales
+
+```python
+# ✅ Correcto
+from collections import defaultdict
+groups = defaultdict(list)
+for item in items:
+    groups[item.category].append(item)
+
+# ❌ Incorrecto
+groups = {}
+for item in items:
+    if item.category not in groups:
+        groups[item.category] = []
+    groups[item.category].append(item)
+```
+
+### 9. **Linters y Herramientas**
+- Seguir las reglas de Ruff y Pyright
+- Resolver todos los warnings de tipo
+- Usar `# type: ignore` solo cuando sea absolutamente necesario
+- Preferir refactoring sobre ignorar warnings
+
+### 10. **Patrones Pythonic Comunes**
+- Usar context managers (`with` statement) para recursos
+- Preferir `pathlib` sobre `os.path`
+- Usar f-strings para formateo de strings
+- Aprovechar el unpacking de tuplas y listas
+
+```python
+# ✅ Correcto
+from pathlib import Path
+
+def read_config(config_path: Path) -> dict:
+    with config_path.open() as f:
+        return json.load(f)
+
+# Unpacking
+first, *middle, last = items
+name, age, *rest = user_data
+```
+
+### 11. **Verificaciones Robustas**
+- Verificar que las estructuras de datos existan antes de acceder
+- Usar métodos seguros como `.get()` para diccionarios
+- Manejar listas vacías y valores None
+
+```python
+# ✅ Correcto
+def safe_process_data(data: Optional[dict]) -> Optional[str]:
+    if not data:
+        return None
+    
+    value = data.get("key")
+    if value is None:
+        return None
+    
+    return str(value).upper()
+```
+
+### 12. **Logging y Debugging**
+- Usar logging en lugar de print para debugging
+- Incluir información contextual en los mensajes
+- Usar diferentes niveles de log apropiadamente
+
+```python
+# ✅ Correcto
+import logging
+
+logger = logging.getLogger(__name__)
+
+def process_item(item_id: str) -> bool:
+    logger.info(f"Procesando item {item_id}")
+    try:
+        # procesamiento
+        logger.debug(f"Item {item_id} procesado exitosamente")
+        return True
+    except Exception as e:
+        logger.error(f"Error procesando item {item_id}: {e}")
+        return False
+```
+
+## Reglas Anti-Redundancia
+
+### 1. **Evitar Verificaciones Duplicadas**
+```python
+# ❌ Redundante
+if data is not None:
+    if data.get("items"):
+        if data["items"]:  # Verificación redundante
+            process(data["items"])
+
+# ✅ Pythonic
+if data and data.get("items"):
+    process(data["items"])
+```
+
+### 2. **Eliminar Imports No Utilizados**
+```python
+# ❌ Redundante
+import os
+import sys
+from typing import Dict, List  # Solo se usa List
+
+def process_list(items: List[str]) -> None:
+    pass
+
+# ✅ Pythonic
+from typing import List
+
+def process_list(items: List[str]) -> None:
+    pass
+```
+
+### 3. **Consolidar Asignaciones Similares**
+```python
+# ❌ Redundante
+docs = results["documents"][idx]
+ids = results["ids"][idx]
+distances = results["distances"][idx]
+
+# ✅ Pythonic
+docs, ids, distances = results["documents"][idx], results["ids"][idx], results["distances"][idx]
+```
+
+### 4. **Evitar Docstrings Verbosos Innecesarios**
+```python
+# ❌ Redundante para funciones simples
+def add_numbers(a: int, b: int) -> int:
+    """
+    Suma dos números enteros.
+    
+    Args:
+        a: Primer número entero
+        b: Segundo número entero
+        
+    Returns:
+        La suma de a y b como entero
+    """
+    return a + b
+
+# ✅ Pythonic
+def add_numbers(a: int, b: int) -> int:
+    """Suma dos números enteros."""
+    return a + b
+```
+
+### 5. **Eliminar Comentarios Obvios**
+```python
+# ❌ Redundante
+x = 5  # Asigna 5 a x
+y = x + 1  # Suma 1 a x y lo asigna a y
+
+# ✅ Pythonic
+x = 5
+y = x + 1
+```
+
+### 6. **Usar Métodos Pythonic para Evitar Verificaciones**
+```python
+# ❌ Redundante
+if "key" in data:
+    if data["key"] is not None:
+        value = data["key"]
+    else:
+        value = "default"
+else:
+    value = "default"
+
+# ✅ Pythonic
+value = data.get("key", "default")
+```
+
+### 7. **Evitar Verificaciones Try-Except Innecesarias**
+```python
+# ❌ Redundante si ya verificaste que existe
+if data and "key" in data:
+    try:
+        value = data["key"]  # Ya sabemos que existe
+    except KeyError:
+        value = None
+
+# ✅ Pythonic
+if data and "key" in data:
+    value = data["key"]
+```
+
+## Reglas para Evitar Errores de Lint
+
+### 1. **Verificación de None antes de indexar**
+```python
+# ✅ Correcto
+if data and data.get("items") and data["items"]:
+    first_item = data["items"][0]
+```
+
+### 2. **Manejo de índices fuera de rango**
+```python
+# ✅ Correcto
+try:
+    item = items[index]
+except IndexError:
+    item = None
+```
+
+### 3. **Verificación de tipos antes de operaciones**
+```python
+# ✅ Correcto
+if isinstance(value, (list, tuple)) and value:
+    for item in value:
+        process(item)
+```
+
+## Checklist de Código Pythonic
+
+Antes de finalizar tu código, verifica:
+
+- [ ] **¿Hay verificaciones duplicadas?** - Consolida en una sola
+- [ ] **¿Hay imports no utilizados?** - Elimínalos
+- [ ] **¿Los nombres son descriptivos?** - Usa nombres claros
+- [ ] **¿Hay comentarios obvios?** - Elimina los innecesarios
+- [ ] **¿Usas métodos pythonic?** - `.get()`, comprensiones, etc.
+- [ ] **¿Hay try-except innecesarios?** - Solo úsalos cuando sea necesario
+- [ ] **¿El código es DRY?** - Evita repetir lógica
+- [ ] **¿Es simple y elegante?** - Prefiere claridad sobre complejidad
+
+Estas reglas aseguran código Python robusto, pythonic y sin redundancias para cualquier proyecto.

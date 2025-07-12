@@ -1,47 +1,50 @@
-import chromadb  # Import the main ChromaDB library to interact with the vector database
+import chromadb
 
-from chromadb.utils import embedding_functions  # Import embedding utilities from ChromaDB
+# Crear cliente persistente y colección
+croma_client = chromadb.PersistentClient(path="./db/chroma_persist")
+collection = croma_client.get_or_create_collection("my_story")
 
-default_ef = embedding_functions.DefaultEmbeddingFunction()  # Create an instance of the default embedding function (not used explicitly here)
-croma_client = chromadb.PersistentClient(path="./db/chroma_persist")  # Initialize a persistent ChromaDB client, storing data at the specified path
-
-collection = croma_client.get_or_create_collection("my_story")  # Get or create a collection named 'my_story' to group related documents
-# Define text documents
-# List of dictionaries, each representing a document with an 'id' and 'text' field
-# These documents will be stored in the collection
+# Datos de ejemplo para insertar
 documents = [
-    {"id": "doc1", "text": "Hello, world!"},  # Document 1: simple greeting
-    {"id": "doc2", "text": "How are you today?"},  # Document 2: question
-    {"id": "doc3", "text": "Goodbye, see you later!"},  # Document 3: farewell
-    {
-        "id": "doc4",
-        "text": "Microsoft is a technology company that develops software. It was founded by Bill Gates and Paul Allen in 1975.",  # Document 4: factual information about Microsoft
-    },
+    {"id": "doc1", "text": "Hello, world!"},  
+    {"id": "doc2", "text": "How are you today?"},  
+    {"id": "doc3", "text": "Goodbye, see you later!"},  
+    {"id": "doc4", "text": "Microsoft is a technology company that develops software. It was founded by Bill Gates and Paul Allen in 1975."},  
 ]
 
-for doc in documents:  # Iterate over each document in the list
-    collection.upsert(ids=doc["id"], documents=[doc["text"]])  # Insert or update the document in the collection using its id and text
+# Insertar documentos en la colección
+for doc in documents:  
+    collection.upsert(ids=doc["id"], documents=[doc["text"]])  
 
-# define a query text
-# This is the text we will use to search for similar documents in the collection
-query_text = "find document related to technology company"
+# Realizar múltiples queries
+query_texts = [
+    "find document related to technology company",
+    "Hello",
+]
+results = collection.query(query_texts=query_texts, n_results=2)
 
-results = collection.query(  # Perform a semantic search in the collection
-    query_texts=[query_text],  # The query is provided as a list
-    n_results=2,  # Retrieve the top 2 most similar documents
-)
+def process_query_results(results, query_texts):
+    """Procesa los resultados de múltiples queries de ChromaDB de forma segura."""
+    # Procesa cada query y sus resultados
+    for idx_query, query_text in enumerate(query_texts):
+        # Obtiene los resultados para esta query específica
+        docs = results.get("documents", [])
+        ids = results.get("ids", [])
+        distances = results.get("distances", [])
+        
+        # Verifica que esta query tenga resultados válidos
+        if (idx_query >= len(docs) or idx_query >= len(ids) or idx_query >= len(distances) or
+            not docs[idx_query] or not ids[idx_query] or not distances[idx_query]):
+            print(f"No se encontraron documentos similares para la consulta: {query_text}")
+            continue
+        
+        # Imprime cada documento encontrado
+        query_docs, query_ids, query_distances = docs[idx_query], ids[idx_query], distances[idx_query]
+        for doc_idx, (document, doc_id, distance) in enumerate(zip(query_docs, query_ids, query_distances)):
+            print(f"Query: {query_text}")
+            print(f"  Documento #{doc_idx + 1}: {document}")
+            print(f"  ID: {doc_id}, Distancia: {distance:.4f}")
+            print("-" * 50)
 
-# Check if the query returned valid results (documents, ids, and distances)
-if (
-    results["documents"] and results["documents"][0]
-    and results["ids"] and results["ids"][0]
-    and results["distances"] and results["distances"][0]
-):
-    for idx, document in enumerate(results["documents"][0]):  # Iterate over each found document
-        doc_id = results["ids"][0][idx]  # Get the document id
-        distance = results["distances"][0][idx]  # Get the similarity distance
-        print(
-            f" For the query: {query_text}, \n Found similar document: {document} (ID: {doc_id}, Distance: {distance})"
-        )  # Print the result: query, document text, id, and distance
-else:
-    print("No se encontraron documentos similares para la consulta.")  # Print a message if no similar documents were found
+# Procesar resultados
+process_query_results(results, query_texts)

@@ -1,5 +1,4 @@
 import chromadb
-import os
 
 # Usar modo persistente para que puedas ver los archivos en ./chroma_db
 client = chromadb.PersistentClient(path="./chroma_db")
