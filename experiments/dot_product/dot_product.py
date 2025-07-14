@@ -73,11 +73,12 @@ for deg in angles_deg:
         showlegend=False
     ))
     # Añadir annotation para TODOS los vectores
-    label = f"{deg}°<br>Dot: {dot_val:.2f}" if is_highlight else f"{dot_val:.2f}"  # Completo para highlights, solo dot para grises
-    font_size = 10 if is_highlight else 8  # Pequeño para grises
+    label = f"{deg}°<br>{dot_val:.3f}" if is_highlight else f"{dot_val:.3f}"  # Completo para highlights, solo dot para grises
+    font_size = 10 if is_highlight else 9  # Pequeño para grises
     font_color = 'blue' if is_highlight else 'gray'
+    x_offset = 0.125 if deg == 360 else 0  # Adds a slight horizontal offset to the 360° label position to prevent overlap with the 0° label, improving graph readability
     fig.add_annotation(
-        x=rotated[0]*1.1, y=rotated[1]*1.1,
+        x=rotated[0]*1.1 + x_offset, y=rotated[1]*1.1,
         text=label,
         showarrow=False,
         font=dict(size=font_size, color=font_color)
@@ -88,7 +89,7 @@ fig.update_layout(
     title='Vectores Rotados cada 5° y Producto Punto (Hover para detalles; Highlights en azul)',
     xaxis=dict(range=[-1.5, 1.5], title='X'),
     yaxis=dict(range=[-1.5, 1.5], title='Y'),
-    width=1200, height=1200,
+    width=1300, height=1300,
     showlegend=False
 )
 
