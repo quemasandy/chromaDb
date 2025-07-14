@@ -240,3 +240,4 @@ db/
 
 # ignore the vector-databases-course folder
 vector-databases-course/
+rotations_results.xlsx
