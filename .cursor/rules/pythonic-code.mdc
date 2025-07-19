@@ -1,10 +1,7 @@
-
 ---
-alwaysApply: true
 description: "Reglas para escribir código Python pythonic sin errores de lint y evitando redundancias"
-globs: "*.py"
+alwaysApply: false
 ---
-
 # Reglas de Código Python Pythonic
 
 ## Principio Central: Código Pythonic y Sin Redundancias
