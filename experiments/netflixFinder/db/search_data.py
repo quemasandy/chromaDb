@@ -18,11 +18,12 @@ logger = logging.getLogger(__name__)
 API_KEY = os.getenv("TMDB_KEY")
 BASE_URL = "https://api.themoviedb.org/3"
 IMAGE_BASE_URL = "https://image.tmdb.org/t/p/w500"
-MAX_RESULTS = 100
+MAX_RESULTS = 1000
 OUTPUT_CSV_FILE = Path(__file__).parent / "netflix_movies.csv"
 NETFLIX_PROVIDER_ID = "8"
 WATCH_REGION = "EC"
 LANGUAGES = "en|es"
+LOOKBACK_DAYS = 730
 
 @dataclass(frozen=True)
 class Movie:
@@ -163,14 +164,14 @@ class TMDBClient:
             raise ValueError("TMDB_KEY environment variable not configured")
         
         today = datetime.now()
-        twelve_months_ago = today - timedelta(days=365)
+        lookback_period = today - timedelta(days=LOOKBACK_DAYS)
         
         search_params = {
             "with_watch_providers": NETFLIX_PROVIDER_ID,
             "watch_region": WATCH_REGION,
             "with_original_language": LANGUAGES,
             "sort_by": "popularity.desc",
-            "release_date.gte": twelve_months_ago.strftime('%Y-%m-%d'),
+            "release_date.gte": lookback_period.strftime('%Y-%m-%d'),
             "release_date.lte": today.strftime('%Y-%m-%d'),
             "page": 1
         }
