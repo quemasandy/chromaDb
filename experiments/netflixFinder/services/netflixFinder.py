@@ -40,8 +40,21 @@ class NetflixFinderService:
             model_name="text-embedding-3-small"  # Specify embedding model to use
         )
         
-        # Create ChromaDB client
-        self.chroma_client = chromadb.PersistentClient(path="./db/chroma_persist")
+        # Create ChromaDB client with absolute path to ensure consistency
+        # Find the project root by looking for the db directory
+        current_file = Path(__file__).absolute()
+        
+        # Navigate up to find the project root (where db directory is located)
+        project_root = current_file.parent.parent.parent.parent
+        chroma_db_path = project_root / "db" / "chroma_persist"
+        
+        # Ensure the path exists
+        if not chroma_db_path.exists():
+            logger.error(f"ChromaDB path does not exist: {chroma_db_path}")
+            raise FileNotFoundError(f"ChromaDB database not found at: {chroma_db_path}")
+        
+        self.chroma_client = chromadb.PersistentClient(path=str(chroma_db_path))
+        logger.info(f"Using ChromaDB path: {chroma_db_path}")
         
         # Get or create collection
         self.collection = self.chroma_client.get_or_create_collection(
