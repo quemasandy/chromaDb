@@ -256,7 +256,7 @@ class NetflixFinderCLI:
             try:
                 # Get search query
                 print("\n" + "="*60)
-                query = self.get_user_input("What do you want to see?")
+                query = self.get_user_input("What do you want to see ?")
                 
                 if not query:
                     print("❌ Please enter a search query.")
