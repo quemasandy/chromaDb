@@ -1,0 +1,7 @@
+---
+alwaysApply: true
+---
+- todo el codigo debe ser escrito en ingles
+- toda string debe estar en ingles
+- solo los comentarios deben ser en español
+- explica cada linea de codigo que escribas con un comentario en el codigo

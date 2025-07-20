@@ -229,14 +229,14 @@ Thumbs.db
 # Data files (uncomment if you don't want to track data)
 # data/
 # datasets/
-# *.csv
+*.csv
 # *.json
 # *.xml
 # *.xlsx
 # *.xls
 
-# ignore the db folder
-db/
+# ignore the db folder in root only
+/db/
 
 # ignore the vector-databases-course folder
 vector-databases-course/

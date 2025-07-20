@@ -21,3 +21,4 @@
 # 19. Backup y recuperación: Implementar estrategias de backup para datos críticos
 # 20. Seguridad: Validar y sanitizar todos los inputs para prevenir inyecciones
 # 21. Siempre dar comentarios para cada línea de código explicando qué hace esta línea de código y cuál es su efecto en el proyecto
+# 22. Todo el codigo incluido sus valores string tienen que escribirse en ingles
