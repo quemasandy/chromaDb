@@ -59,9 +59,11 @@ def split_text(text, chunk_size=1000, chunk_overlap=20):
 
 
 # Load documents from the directory
-directory_path = "./data/new_articles"  # Set the directory path for the documents
+# Set the directory path for the documents
+directory_path = current_file.parent / "data" / "new_articles"
 documents = load_documents_from_directory(directory_path)  # Load documents from the specified directory
 
+print(documents)
 # # Split the documents into chunks
 # chunked_documents = []  # Initialize an empty list to store chunked documents
 # for doc in documents:  # Iterate over each document
