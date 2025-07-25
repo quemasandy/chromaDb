@@ -28,30 +28,23 @@ collection = chroma_client.get_or_create_collection(
 
 client = OpenAI(api_key=openai_key)
 
-# Function to query documents
+
 def query_documents(question, n_results=2):
-    # query_embedding = get_openai_embedding(question)
-    results = collection.query(query_texts=question, n_results=n_results)  # Query the collection for relevant documents using the question
+    results = collection.query(query_texts=question, n_results=n_results)
 
-    # Extract the relevant chunks
-    relevant_chunks = [doc for sublist in results["documents"] for doc in sublist]  # Flatten the list of documents
-    print("==== Returning relevant chunks ====")  # Print a message for returning relevant chunks
-    return relevant_chunks  # Return the relevant chunks
-    # for idx, document in enumerate(results["documents"][0]):
-    #     doc_id = results["ids"][0][idx]
-    #     distance = results["distances"][0][idx]
-    #     print(f"Found document chunk: {document} (ID: {doc_id}, Distance: {distance})")
+    relevant_chunks = [doc for sublist in results["documents"] for doc in sublist]
+    print("==== Returning relevant chunks ====")
+    return relevant_chunks
 
 
-# Function to generate a response from OpenAI
 def generate_response(question, relevant_chunks):
-    context = "\n\n".join(relevant_chunks)  # Join the relevant chunks to form the context
+    context = "\n\n".join(relevant_chunks)
     prompt = (
         "You are an assistant for question-answering tasks. Use the following pieces of "
         "retrieved context to answer the question. If you don't know the answer, say that you "
         "don't know. Use three sentences maximum and keep the answer concise."
         "\n\nContext:\n" + context + "\n\nQuestion:\n" + question
-    )  # Create the prompt for the OpenAI API
+    )
 
     response = client.chat.completions.create(
         model="gpt-3.5-turbo",
@@ -65,15 +58,15 @@ def generate_response(question, relevant_chunks):
                 "content": question,
             },
         ],
-    )  # Call the OpenAI API to generate a response
+    )  
 
-    answer = response.choices[0].message  # Extract the answer from the response
-    return answer  # Return the answer
+    answer = response.choices[0].message  
+    return answer  
 
 
-question = "give me a brief overview of the articles. Be concise, please."  # Set the question to ask
-relevant_chunks = query_documents(question)  # Query the collection for relevant chunks
-answer = generate_response(question, relevant_chunks)  # Generate a response using the relevant chunks
+question = "give me a brief overview of the articles. Be concise, please."
+relevant_chunks = query_documents(question)
+answer = generate_response(question, relevant_chunks)
 
-print("==== Answer ====")  # Print a message indicating the answer is being printed
-print(answer.content)  # Print the answer content
+print("==== Answer ====")
+print(answer.content)
