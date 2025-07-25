@@ -1,0 +1,1156 @@
+actua como un experto en negocio y emprendimiento ayudame a analizar y comprender el siguiente texte entre """ """
+me gustari entender como puedo generar ideas de negocio de nicho con este conocimiento
+
+"""
+So far, we were able to do the most important thing, which is load the source data.
+
+In this case, we have just a few documents or just a few pieces of documents.
+
+Uh, although they're small, but we can scale it up.
+
+Right.
+
+So what happens now is that we load that into our vector store or vector database.
+
+In this case we're talking about the chroma DB.
+
+And what happens then is we're able to then pass a query in former text.
+
+And that is indeed transformed into an embedding or a vector space, which then is sent out into the
+
+vector store vector database to do the search.
+
+Right.
+
+So does the similarity search.
+
+And then we're able to see the result.
+
+So we get the most similar pieces of that document.
+
+So this is wonderful.
+
+But what we really want to accomplish is something that is a little bit fuller.
+
+Because the whole idea behind vector databases is that we want to be able to query them with the help,
+
+of course, of large language models or models in general.
+
+That's the whole idea.
+
+So what we want to be able to do is, for instance, we have a bunch of documents.
+
+We want to be able to take those documents and split them into smaller chunks.
+
+And then once they're split, we are going to transform those into embeds or embeddings.
+
+And these embeddings are the ones that are going to be stored in the vector store.
+
+And as you know by now, we're able to pass these embeddings, which are vectors that not only have
+
+attached to them vectors, but they also have the original test splits that were happen, the splits
+
+that correspond to that vector space.
+
+So that's what we have so far.
+
+But what happens next is as follows.
+
+We want to be able again, you've seen this before.
+
+We want to be able to have a question again, which is going to be transform into an embedding.
+
+And then we have the index here.
+
+And the index is going to help, uh, make this whole process of querying and searching and comparing
+
+all the entries in the vector database way faster.
+
+Okay.
+
+And so what will happen internally then is that we are going to, according to the question or query
+
+that was passed in, it's going to be able to search and compare all the entries in the vector database
+
+and then pick the most similar entries, which is exactly what we've been doing, and then showing that.
+
+But now we're going to take this to the next step because we don't want just to see, for instance,
+
+if I ask, you know, tell me about physics and just give me the chunks in the parts of the documents
+
+that are related to physics, that is fine.
+
+We got that.
+
+But we want to go even further to say, tell me about physics.
+
+And then what will happen is that we're going to get this comparison that happens in the vector B,
+
+and we're going to pick the most similar entry.
+
+This is where we have stopped and get the result so far.
+
+We want to take this result.
+
+The similarities that were these embeddings that are similar results.
+
+Right.
+
+We're going to pick those.
+
+And then we're going to pass them through a large language model.
+
+So it's going to take the most similar entry found and pass it on to the large language model with the
+
+question and query and everything.
+
+So now we have the first question that was asked by the user and went through the whole process.
+
+And we're going to take that question and put it all together with the most similar entry in this case,
+
+the chunks of those documents that are most similar related to that question query and pass that through
+
+the large language model, and then we're going to get the actual answer or the result.
+
+Okay.
+
+So that is what we're going to be seeing how to do in the next videos.
+
+So now we have this data directory with new articles.
+
+So this is just a bunch of articles that are found online.
+
+Each one of these articles is inside of each its own document TXT document as you see here.
+
+Okay.
+
+So we are going to use all of these documents.
+
+So essentially we're going to load all these documents into a database or a vector database.
+
+But before that we're going to split them up and then create embeddings as we split them up and then
+
+put them in a database.
+
+Persist that information and make sure that we're able to do what we did before, which is to query
+
+the database, the vector database space, the vector database space, and then be able to extract that
+
+information that we received, which is the query, as well as the results we got from the query querying
+
+our vector base.
+
+And then push all of that into a large language model.
+
+In this case we're just going to use GPT, use some of their models to actually to be able to ask questions
+
+and receive answers, direct answers, not just approximations from our query.
+
+So I went ahead and created, of course, a new file here called vector db lm large language model.
+
+Okay.
+
+So first I'm going to go ahead and do some imports here.
+
+So most importantly remember I'm getting chrome utils and embedding functions.
+
+That way we can also pass along not default embeddings.
+
+We're going to use OpenAI embeddings just like what we did before.
+
+I have the Chrome DB of course the OpenAI all of that.
+
+And then let's go ahead and pass in here this variables for date for for our e for our e and V file.
+
+So load all of those environment variables which means then I'm going to be able to create our OpenAI
+
+API key.
+
+Then I'm going to go ahead and get the OpenAI API key.
+
+Make sure that you have that under your dot env file.
+
+That's where we just like what we did before.
+
+All right.
+
+So the next part here I'm going to create the OpenAI embedding function.
+
+So we'll just say OpenAI embedding functions.
+
+And I'm using the text embedding three small model there.
+
+And of course I'm passing the OpenAI key.
+
+So we're able to actually go and get through the API, get the embedding object functions.
+
+So we can use here okay.
+
+So next we initializing chroma client with persistence.
+
+So this is very important because as you can see here we seen this before.
+
+We have client chroma DB persistent client.
+
+We're passing just the path where we want this to be.
+
+I'm going to just put actually something like DB so that it goes under this folder here DB okay we have
+
+the previous ones but that doesn't matter.
+
+It's going to go ahead and create a new one.
+
+And we have a collection name here.
+
+We call document QA collection.
+
+And I can say that's very good.
+
+And for then here I'm creating the client.
+
+So get or create collection the actual.
+
+So here we're creating the actual collection.
+
+We pass the collection name which we specified it up.
+
+And we pass along the embedding function.
+
+In this case we're going to use the OpenAI embedding function which we instantiated there.
+
+So now we're going to put together here all the functions that will allow us to do what we want to do.
+
+So what we really want to do is we want to be able to load all of these data, which is this new articles
+
+into our database.
+
+Okay.
+
+So to do so I'm going to get a I already have the function that does all of that.
+
+So I'm going to just go ahead and get it.
+
+This is the function of course that loads documents from a directory.
+
+So we pass the directory path.
+
+So we passing here the directory path.
+
+And I have this print that says loading documents from directory okay.
+
+So essentially here we're going to this directory.
+
+Find this directory where we have data in new articles.
+
+And then we find all of these files that are they have txt at the end.
+
+As you can see if I hover over these all of them have txt at the end.
+
+It's kind of hard to see but there we go.
+
+So going through all of that and then and then create the actual documents.
+
+And then we return the document.
+
+So each time we loop through we are appending the actual document format into the ID, and it's going
+
+to be the file name.
+
+And the text is going to be the contents of that document.
+
+So we're creating those documents and then we'll return.
+
+Now the next part here is going to be to actually split those text into chunks.
+
+Right.
+
+Because we need to make sure that those are small pieces, those chunks, these are the ones that are
+
+going to be transformed into embeddings and then added into the vector database.
+
+So we have another function for that which is this.
+
+So splits text.
+
+We pass the actual text to be split.
+
+And the chunk size.
+
+For each chunk size, we're going to say a thousand.
+
+That's just the number of I got.
+
+You can make it smaller or larger and chunk overlap is 20.
+
+So this here is to allow for the context to not be lost.
+
+Now this is a little bit more advanced, but the idea is that if we have different chunks larger this
+
+overlap the better the context for each one of these pieces we are going to preserve.
+
+Okay.
+
+So essentially we're going through everything the text that we are receiving.
+
+And we're just splitting into different chunks into different chunks.
+
+And mining of course overlap to be there.
+
+And then we'll return all those chunks.
+
+Okay.
+
+So now let's go ahead and do the actual loading of everything.
+
+So let's see here.
+
+So I'm going to load the documents from our folder directory here.
+
+Data news articles.
+
+That's all I'm doing here.
+
+So I created this function first because it would be easier for us to call them.
+
+As you can see here, we're actually calling load documents from directory.
+
+Okay.
+
+So we have here first of all we specifying the directory path.
+
+So we say it's data news articles which is exactly what we have here.
+
+If you change these names of course make sure you change this path as well.
+
+So we're going to this articles new articles.
+
+In fact I made a mistake here.
+
+Let's see.
+
+Should be new news article.
+
+So I'm going to just say it's new article because I made a mistake here.
+
+It should be news but it says new.
+
+That's okay.
+
+All right so there we go.
+
+We have that set up.
+
+And then we are getting all the documents by calling load documents from directory.
+
+Because remember this is returning load documents from directory.
+
+We pass in the directory path and returns those actual documents.
+
+All right.
+
+So now we're using those functions we just created here.
+
+And now let's go ahead.
+
+And just for us to see I'm going to just print.
+
+And I'm going just to go ahead and say loaded documents and get the length of those documents.
+
+This comes in as a list, as you can see here.
+
+And I can just get the length.
+
+Okay.
+
+Let's go ahead and run this real quick okay.
+
+Loading 21 documents what I had and created about 21 documents actually loaded 21 documents as you see
+
+here.
+
+So we have probably about 21 documents.
+
+Very good.
+
+Now I can also print.
+
+Just want to see the actual documents like this.
+
+We should get a list of documents which we can also see.
+
+Okay.
+
+You can see now we have this list of all of the documents that we have downloaded.
+
+It's a very long list of everything.
+
+All right.
+
+Very good.
+
+
+Right.
+
+So we know that the documents are loaded because we can actually see all the documents here when we
+
+do print, as you see there.
+
+Next, we need to split the documents into small chunks.
+
+So I have so here's what we do.
+
+We create a list create an empty list.
+
+And we loop through all those documents and we call the split text.
+
+So this split text we created, we pass in text the chunk size and the chunk overlap.
+
+So it will return a list of those documents the splits okay.
+
+So that's all we're doing here.
+
+I've added some of these prints here so that we can see what's happening as we as these are called.
+
+So now that we have those chunks we need to transform them into embeddings.
+
+So essentially we're following exactly what we've seen before where we've talked about to do.
+
+So I'm going to also create a function that does that.
+
+And I'm going to put that right right here.
+
+So but before we do that below here I'm going to say client.
+
+OpenAI.
+
+And then I'm going to pass the API key which I know I have access to that which is this guy here.
+
+So now I can go and create those embeddings okay.
+
+So get OpenAI embeddings.
+
+So we pass the text that was going to be transform into embeddings.
+
+So we use here client embeddings that create.
+
+Now how do I know how to do this.
+
+Well we'll go back to OpenAI documentation.
+
+We can go and let's go to tutorials.
+
+So here it will show you exactly.
+
+Let me just make sure this is let's just go to quick start.
+
+I think that's the best place.
+
+And it tells you exactly how to get started, install Python and all that great stuff.
+
+And if you scroll all the way down here, we have this chat completion.
+
+Now they have changed a few of their their change.
+
+Some of the way we call things.
+
+But it's okay.
+
+You can always come here to make sure that you are up to date.
+
+So the idea is that we instantiate our client.
+
+In this case I passed along the API key and then we just say client chat completion and create.
+
+And then I'm pass the model and then the messages.
+
+So we have the role and the we have the role for the system and the role for user.
+
+So this is the prompt for the user.
+
+The question that comes in as you will see in a second.
+
+And this is for the and this is for the system to say, okay, what is it that I want the system to
+
+know.
+
+That way when we ask questions this is going to be contextualized.
+
+All right.
+
+So that's where I got it from.
+
+This is where you should come to get understand more how to use OpenAI to do things.
+
+Now this is actually for the completions create.
+
+But I can go to embeddings by the way, which is the one that I wanted to show you.
+
+Let's go to embeddings.
+
+If you click embeddings we should have the code that says client dot embeddings dot create.
+
+And then you have the input, and then you have the model that you pass along.
+
+All right.
+
+So that's what we're doing here.
+
+So I say client embeddings.
+
+The input is text the model I got the text embedding three small because that's all we need.
+
+And then I and then we go ahead.
+
+And from this response here I get the actual embedding for the text that we passed in which then is
+
+returned here okay.
+
+So it's going to be a list of floats.
+
+As you know all embeddings are vector spaces really.
+
+And so they all come as floats okay.
+
+So now that we have the embedding function, now I need to take each one of those chunks of this document
+
+that we created here and create the actual embeddings.
+
+All I'm going to do is I'm going to go through this chunked documents, which we have access to here,
+
+because we got those chunk documents and we're going to loop through.
+
+So as we loop through we are going to create the actual embeddings.
+
+So we're going to generate embeddings for the document chunks.
+
+That's all we're doing here.
+
+So for the get OpenAI embedding here we pass the doc the text field in our doc as we loop through.
+
+And then we pass to the field embedding for that document for each one of those documents.
+
+So now that we have the embeddings, notice the process.
+
+We have the documents.
+
+We chop it up in small pieces.
+
+And now we have to create those embeddings which are then used to be added into the vector database.
+
+You see the flow right.
+
+And so now we're going to insert into our database because we have those embeddings.
+
+So I'm going to copy this and pass in there.
+
+So now we can now you can see here we have our chunk chunk documents.
+
+So we're going to loop through and start inserting all of that information.
+
+And so we use collection upsert and we pass ID.
+
+So this is the same thing we've seen before.
+
+Ask the actual documents.
+
+And notice here.
+
+Now what we're doing is we're saying embeddings is doc embedding because that is what we have been doing
+
+here.
+
+Right.
+
+So the document each documents now should have its own embedding as we loop through because we're calling
+
+the get OpenAI embedding.
+
+We're passing the text that chunk of text.
+
+And then we create an embedding and put that into the document.
+
+So the document now has embeddings.
+
+That's why we say embeddings as we loop through or rather as we loop through each one of those chunks
+
+of documents, we're going to insert each one and add it an ID as well as adding the text, but also
+
+importantly appending in this case the embeddings along for this vector, this document as we insert
+
+everything.
+
+So if you open db you can see we have the previous databases here.
+
+But now if I were to run this fall goes well, I'm going to be able to actually insert everything into
+
+the document, into the database.
+
+So let's clear this.
+
+And run again.
+
+You can see here what splitting embeddings.
+
+And soon you should see something happening here.
+
+So it's generating embeddings because it will take a little bit because it's a lot of information.
+
+You can see now inserting chunks into DB.
+
+Okay let's open this.
+
+All right.
+
+So this was created earlier.
+
+But now you can see if you go to Chrome Persistence or Persist.
+
+You can see we have our chroma persist database here.
+
+So what I can do again command p or command shift p.
+
+And I'm going to say open database.
+
+And let me go ahead and and get the chrome persist because we have a few here.
+
+So let's see I think this is the one okay.
+
+So I deleted everything.
+
+Let's start over I think that will probably be better.
+
+Let's run this again.
+
+Okay.
+
+So splitting generating embeddings.
+
+That's very good.
+
+You can see now.
+
+Database was created.
+
+Let's give it a moment.
+
+We went ahead and inserted everything into the database.
+
+Right.
+
+Let's see if this is true.
+
+So let's go back and say command shift P.
+
+Let's say open database.
+
+That's the only one we have right now.
+
+Let's open that and let's go SQLite explorer.
+
+Just refresh just in case.
+
+And you can see if I were to run any of these, you can see that we have all of these.
+
+Okay.
+
+See, all of these are actually it's the database with all of the text.
+
+And you can see this week apps Apple and very good.
+
+So all the chunks are actually added to the database.
+
+And I can continue to run something else.
+
+For instance search.
+
+You can see that we have full text search.
+
+And each one of these is different chunks with all the overlap and everything.
+
+So that is beautiful okay.
+
+So this actually works.
+
+So let's look at collection.
+
+That should give us Document.query collection and dimensions and everything okay.
+
+So we're able to get all those chunks converted into embeddings.
+
+And then take those embeddings and added them into chroma DB, the vector database.
+
+So we know that we have our database, our vector database, and has all of the embeddings.
+
+Everything is good.
+
+So at this point here, what I would do actually is I would go ahead and comment all of this out, because
+
+we don't want to make it so that every time we run this, we ended up doing the same thing.
+
+We don't need to do that anymore.
+
+So I'm going to go ahead and just comment all of this out.
+
+Let's see.
+
+All the way pretty much all the way here.
+
+So everything we've written so far it's okay.
+
+Just comment it all out.
+
+So the next thing we'll do is we are going to go ahead and get the function to query documents.
+
+So I'm going to put that function here.
+
+So it's very simple.
+
+This query documents once called we pass the question which is going to be the question the query and
+
+then the end results.
+
+In this case we just want to at this point.
+
+But this is actually not going to be relevant.
+
+But I'll just skip it there because the idea here is that we're going to attach do this final part,
+
+which is we're going to attach all this information, all these embeddings that come that are similar
+
+to the large language model, as well as the question, that's why we're passing this, to then make
+
+it so that we can ask the large language model to questions about the data that we have.
+
+Okay.
+
+So we're calling collection query passing in the query text question, which is what we have here.
+
+And I'm also passing the end results.
+
+Now this is going to be redundant.
+
+It would only work or would be needed if we were just to go ahead and do what we did before, which
+
+was just to get some of the documents that have indeed the close that gives us the distances between
+
+the documents, but we have moved on from that.
+
+So this is no longer necessary.
+
+But I'm going to leave there anyway.
+
+The other thing you can do also, you can actually create the query embedding by calling the get OpenAI
+
+embedding and passing it the question.
+
+So we can make it that as embedding in this case here I'm just going to go straight and pass for our
+
+query here the actual text question okay.
+
+Either way.
+
+All right.
+
+So then I get relevant chunks here.
+
+What I'm doing here after I get the results here I'm just getting all the documents and then uh, just
+
+retrieving the relevant chunks that I need.
+
+And I'm printing here, returning relevant chunks so that we have something to look at, and then we'll
+
+return the relevant chunks.
+
+Now we have the relevant chunks.
+
+Let's go ahead.
+
+And I'm going to just call that so we can see something.
+
+So at the bottom here I'm going to add a question.
+
+So this is about tell me about AI replacing TV writers strikes.
+
+So I know this because in the document here that we have there is something related to.
+
+Writers write.
+
+I replaced TV writers, so I just ask a question related to that to see if this will actually give us
+
+something useful.
+
+So I call relevant chunks.
+
+I call the query documents, which is what we just created here, and then does everything.
+
+It should return relevant chunks for us.
+
+So in this case here this relevant chunks is going to be a list of documents.
+
+I'm going to go ahead and print them so we can hopefully see.
+
+Now make sure again that you commented out everything else so that we don't have to go through the whole
+
+process again, which takes a little bit of time because everything is in database now.
+
+So we can just be.
+
+Okay.
+
+And just like that, we went ahead and said, returning relevant chunks in the must watch final season
+
+of succession.
+
+And it gives all this stuff so very good.
+
+So it's giving something related to picture and television producers refuse to engage with the propos
+
+ed and all the things.
+
+So remember, these chunks may look a little bit weird because we when we created them, when they were
+
+split up, we made sure that we have the overlap to make sure that we don't lose the context.
+
+Okay.
+
+So there we go.
+
+So we went ahead and got the correct information which is relevant to AI and writing and so forth.
+
+Okay.
+
+So this is for writers Strike.
+
+If I were to ask something like, let's say Databricks.
+
+Okay.
+
+Databricks acquires.
+
+I am going to ask a question about that.
+
+Tell me about Databricks acquiring.
+
+Acquisition of I.
+
+Something like this.
+
+Okay.
+
+Let's go ahead and save.
+
+I'm going to go ahead and clear this and run.
+
+And you can see it should go and get Databricks.
+
+Voila!
+
+Today announced that it has acquired or Kira I very good.
+
+So this is indeed working, which is exactly what we want.
+
+So the next step will be to take these chunks.
+
+Because remember these are pieces of data, pieces of information that then we are going to be able
+
+to take this chunk and then pass it through the large language model.
+
+All right.
+
+So that we can ask actual questions instead of just getting the these chunks.
+
+We want to get the actual answer to say yes, Databricks did X, Y and Z everything direct.
+
+All right.
+
+So that is the beauty of this whole workflow from having the documents, as we see as we saw, chopping
+
+them up into smaller pieces and then passing them through the process of creating embeddings and then
+
+putting all of that into database.
+
+At this point, we're able to get the documents that are related to that question, which is exactly
+
+what we've been doing so far.
+
+But now we're going to put all of that information with the question through the large language model
+
+and then get the direct answer.
+
+So we're able to get the relevant chunks, which is a win.
+
+Now we're going to get this relevant chunks with the query and pass that through the large language
+
+model.
+
+So we're going to use of course OpenAI API here.
+
+If you go back and go to kick start and you can see that we can actually we have declined already.
+
+And we're going to invoke the completion endpoint here.
+
+So client chat completions that create.
+
+So this is what we're going to do.
+
+So what we'll do here is we're going to train our system to say okay you are a person who does x, y
+
+and z.
+
+So I want you to take the information I'm going to give you right now and then answer because you are
+
+really knowledgeable.
+
+And then we pass for the user.
+
+This is the question, the query.
+
+We're going to pass it along here.
+
+And then we should have that information right.
+
+The actual result or the actual answer okay.
+
+So how do we do that.
+
+Well first let's go ahead and get the function to generate a response from OpenAI okay.
+
+So this is the function to generate a response.
+
+So we have the question that needs to be passed along as well as the relevant chunks.
+
+So the first thing we need to do here is we're going to add a context.
+
+So the context is to say is what we're going to add with our prompt.
+
+So that the system knows what is the context.
+
+What is it that I need to focus on?
+
+What kind of skills I have to have to be able to do x, Y, and z.
+
+So essentially that's what we're doing here.
+
+So essentially I'm saying here you're an assistant of question answering tasks.
+
+Use the following piece of retrieved context to answer the question.
+
+If you don't know the answer, say that you don't know.
+
+Use three sentences maximum and keep the answer concise.
+
+So this is something that I've wrote.
+
+Um, for the prompt you can modify this to whatever else you want.
+
+Now here I'm passing the context.
+
+So the context I'm passing here as a variable which is going to be this.
+
+So the context is going to be all of the relevant chunks.
+
+So it's essentially saying hey take all of this relevant chunks that we're going to pass through here.
+
+And then answer the question that I'm also going to pass through.
+
+Because your knowledge.
+
+But this is your prompt.
+
+Now then we use the response.
+
+Then we use the completions and API here.
+
+Client chat completions that create.
+
+We need to pass a model.
+
+In this case just pass GPT 3.5 turbo because it's cheaper and is just really good.
+
+Now there's GPT four and by the end, by the time you finish watching this course may be something way,
+
+way better you can use GPT for oh, it doesn't matter.
+
+So this is just an example.
+
+You we're just going to use GPT three five turbo.
+
+And then in the messages here this is where we pass the role system.
+
+So essentially this is exactly what we had here okay.
+
+So in fact I just got it from here.
+
+So for the prompt here for the system to say hey system this is your context.
+
+This is what your what your expert in.
+
+We pass the prompt which is what we added here, which which in turn we have the context and the question
+
+to be answered by this system, by the system and then the user here.
+
+This is where we pass the actual question.
+
+The question which is going to pass here.
+
+Very good.
+
+And all we have to do now, because we know that this is the beauty.
+
+That response requires a question and the relevant chunks to do the magic.
+
+So we already we already have all of that.
+
+Now all we have to do really is just call the generate response.
+
+So answer say generate response and pass the question which is what we have here and the relevant chunks,
+
+which is what we have here because we get that from query uh, documents and pass the question.
+
+Okay.
+
+So now I can just get rid of that and just say print answer and print the answer as such.
+
+Look what will happen.
+
+So I'm going to so before we had this we get all the chunks.
+
+That's fine.
+
+But now we're going to use the large language model to give us magic.
+
+So we're going to run returning the relevant chunks.
+
+And there we go.
+
+So it gives us the chat completion object with content that says Databricks Acquire Okara, a data governance
+
+platform with a focus on AI.
+
+So now I can probe in and get the actual content instead of just getting the object.
+
+Okay, so I can say here is the answer.
+
+Get the content.
+
+If I save now, if I do the same thing, you can see that now instead of the object which if you scroll
+
+down the object has all these other metadata too, so can be handy.
+
+Let's run should get the same answer mainly, but now we get the actual answer.
+
+Look at this.
+
+I can even ask something like this.
+
+Tell me about.
+
+They strike in the company or something like that, because we remember that the writers, there's should
+
+be a document about writers strikes and so forth.
+
+So let's run this and see if it's going to work.
+
+Okay, look at this.
+
+The Writers Guild of America is striking for the first time since 2007.
+
+I can ask other questions.
+
+For instance, uh, let's say fintechs fintech space or SpaceX Starship.
+
+Something related to that.
+
+Tell me about space X.
+
+Okay, look at this.
+
+Space X Starship is a super heavy launch system, blah blah blah.
+
+And there you go.
+
+So now we can ask questions about all of those articles, all of that information.
+
+So I can say, give me a summary.
+
+Let's say a brief overview of the articles.
+
+Concise.
+
+This is pretty fun.
+
+Okay, there we go.
+
+The articles cover topics such lifts, equity, uh, first quarter results, potential upsides amidst
+
+its new strategic direction and impact of of down rounds.
+
+Its also mentions upcoming events like DC City Spotlight index venture TechCrunch of all of these great,
+
+great things.
+
+So now we're able to go through the whole flow of taking documents and splitting them up, creating
+
+the actual embeddings, and then adding those embeddings into the vector store in this vector database
+
+chroma.
+
+That's what we're using.
+
+And then be able to of course query that, but then get all those results.
+
+And then with the question pass that through the large language model.
+
+So we get a very concise answer within the context of our documents.
+
+And there you have it.
+
+We just finished the whole workflow, okay.
+
+So we're able to get documents and split them up and then create embeddings and then save those embeddings
+
+along with the original text splits into the vector database.
+
+Okay.
+
+So this is wonderful.
+
+But then we took things a little bit further.
+
+So we took the question.
+
+We were able to get the query in question and turn that into embedding.
+
+And then we're able then to search and compare all entries in the vector database and then pick the
+
+most similar entry.
+
+And then the final part, which is the whole idea behind what we've been learning about vector databases
+
+and so forth, is that we then pick the most similar entries.
+
+Those are picked and they're passed through an LM, a large language model.
+
+In this case, we're just using the OpenAI large language model model in this case.
+
+But you could use any kind of large language model or model out there.
+
+Okay.
+
+And so we put all of these similar entries with the question the query.
+
+And we pass through the large language model.
+
+And we got the actual result.
+
+This is the culmination.
+
+This is the reason why main reason why that we have vector databases so that they can work with large
+
+language models to give users in this case create results, direct results and responses.
+
+I hope this is making sense and you're seeing the value in learning vector databases.
+"""
+
+actua como un experto en negocio y emprendimiento ayudame a analizar y comprender el siguiente texte entre """ """
+me gustari entender como puedo generar ideas de negocio de nicho con este conocimiento
