@@ -1,67 +1,57 @@
-import os  # Import the os module to interact with the operating system
-from dotenv import load_dotenv  # Import load_dotenv to load environment variables from a .env file
-from pathlib import Path  # Import Path from pathlib to handle file system paths
-import chromadb  # Import chromadb to interact with ChromaDB
-from openai import OpenAI  # Import OpenAI to use the OpenAI API
-from chromadb.utils import embedding_functions  # Import embedding_functions to use embedding utilities from ChromaDB
+import os
+from dotenv import load_dotenv
+from pathlib import Path
+import chromadb
+from openai import OpenAI
+from chromadb.utils import embedding_functions
 
-# Load environment variables from .env file
-load_dotenv()  # Load environment variables from a .env file into the environment
-openai_key = os.getenv("OPENAI_API_KEY")  # Get the OpenAI API key from environment variables
+load_dotenv()
+openai_key = os.getenv("OPENAI_API_KEY")
 
 openai_ef = embedding_functions.OpenAIEmbeddingFunction(
     api_key=openai_key, model_name="text-embedding-3-small"
-)  # Create an OpenAI embedding function using the API key and a specific model
+)
 
-current_file = Path(__file__).absolute()    # Get the absolute path of the current file
-project_root = current_file.parent.parent  # Get the project root directory (two levels up)
-chroma_db_path = project_root / "db" / "chroma_persist"  # Set the path for the ChromaDB persistent storage
+current_file = Path(__file__).absolute()
+project_root = current_file.parent.parent
+chroma_db_path = project_root / "db" / "chroma_persist"
 
-if not chroma_db_path.exists():  # Check if the ChromaDB path exists
-    print(f"ChromaDB path does not exist: {chroma_db_path}")  # Print an error message if the path does not exist
-    raise FileNotFoundError(f"ChromaDB database not found at: {chroma_db_path}")  # Raise an error if the path does not exist
+if not chroma_db_path.exists():
+    print(f"ChromaDB path does not exist: {chroma_db_path}")
+    raise FileNotFoundError(f"ChromaDB database not found at: {chroma_db_path}")
 
-# Initialize the Chroma client with persistence
-chroma_client = chromadb.PersistentClient(path=str(chroma_db_path))  # Create a persistent ChromaDB client using the specified path
-collection_name = "document_qa_collection"  # Set the name for the collection
+chroma_client = chromadb.PersistentClient(path=str(chroma_db_path))
+collection_name = "document_qa_collection"
 collection = chroma_client.get_or_create_collection(
     name=collection_name, embedding_function=openai_ef
-)  # Get or create a collection in ChromaDB with the specified name and embedding function
+)
 
-client = OpenAI(api_key=openai_key)  # Create an OpenAI client using the API key
+client = OpenAI(api_key=openai_key)
 
-
-# =================================
-# === For initial setup -- Uncomment (below) all for the first run, and then comment it all out ===
-# =================================
-# Function to load documents from a directory
 def load_documents_from_directory(directory_path):
-    print("==== Loading documents from directory ====")  # Print a message indicating documents are being loaded
-    documents = []  # Initialize an empty list to store documents
-    for filename in os.listdir(directory_path):  # Iterate over all files in the directory
-        if filename.endswith(".txt"):  # Only process .txt files
+    print("==== Loading documents from directory ====")
+    documents = []  
+    for filename in os.listdir(directory_path):  
+        if filename.endswith(".txt"):  
             with open(
                 os.path.join(directory_path, filename), "r", encoding="utf-8"
-            ) as file:  # Open the file in read mode with UTF-8 encoding
-                documents.append({"id": filename, "text": file.read()})  # Add the file content and filename as a document
-    return documents  # Return the list of documents
+            ) as file:  
+                documents.append({"id": filename, "text": file.read()})  
+    return documents  
 
 
-# Function to split text into chunks
 def split_text(text, chunk_size=1000, chunk_overlap=20):
-    chunks = []  # Initialize an empty list to store text chunks
-    start = 0  # Start index for chunking
-    while start < len(text):  # Continue until the end of the text
-        end = start + chunk_size  # Calculate the end index for the chunk
-        chunks.append(text[start:end])  # Add the chunk to the list
-        start = end - chunk_overlap  # Move the start index forward, with overlap
-    return chunks  # Return the list of chunks
+    chunks = []  
+    start = 0  
+    while start < len(text):  
+        end = start + chunk_size  
+        chunks.append(text[start:end])  
+        start = end - chunk_overlap  
+    return chunks  
 
 
-# Load documents from the directory
-# Set the directory path for the documents
 directory_path = current_file.parent / "data" / "new_articles"
-documents = load_documents_from_directory(directory_path)  # Load documents from the specified directory
+documents = load_documents_from_directory(directory_path)
 
 print(documents)
 # # Split the documents into chunks
