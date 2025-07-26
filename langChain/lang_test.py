@@ -2,6 +2,8 @@ import os
 from dotenv import load_dotenv
 from langchain_openai import ChatOpenAI
 from langchain_core.messages import HumanMessage, SystemMessage
+from langchain.document_loaders import DirectoryLoader, TextLoader
+from langchain.vectorstores import Chroma
 
 load_dotenv()
 
@@ -20,3 +22,9 @@ messages = [
 response = model.invoke(messages)
 
 print(response.content)
+
+# load documents
+loader = DirectoryLoader(
+    path="./data/new_articles/", glob="*.txt", loader_cls=TextLoader
+)
+document = loader.load()

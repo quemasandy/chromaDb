@@ -1,0 +1,38 @@
+---
+alwaysApply: false
+---
+
+Cuando la consulta o el cambio de código trate de LangChain/LangGraph (p. ej., LCEL, Runnables, retrievers, vector stores como Chroma/FAISS, LangSmith, callbacks, memory, LangGraph nodes/edges/checkpointing), usa el MCP server "langchain-docs-mcp" para fundamentar la respuesta.
+
+Flujo:
+1) Llama la herramienta `list_doc_sources` para ver las fuentes disponibles (los llms.txt).
+2) Llama `fetch_docs` sobre el/los llms.txt y examina las URLs/ancoras listadas.
+3) Elige y vuelve a llamar `fetch_docs` SOLO en las secciones que respondan a la pregunta actual.
+4) Redacta la respuesta apoyándote en esas secciones. Incluye al final las URLs exactas que usaste.
+5) Por defecto, da ejemplos en TypeScript para Node.js; si el usuario pide Python, cambia a Python.
+
+Criterios de activación (usa MCP SOLO si aplica):
+- El prompt menciona LangChain, LangGraph, LCEL, Runnable*, retriever, tool calling en LangChain, integración con OpenAI/Anthropic, orquestación con LangGraph, o dudas de configuración/versión de estas libs.
+- Estás escribiendo o corrigiendo código que importa `langchain`, `@langchain/*`, `langgraph`, `@langchain/langgraph`, o integra vector stores/adapters de LangChain.
+
+Políticas:
+- No inventes APIs: si la sección no aparece en docs, dilo y sugiere buscar otra fuente.
+- Respeta versiones: si el llms.txt incluye notas de versión, adhiérete a ellas.
+- Seguridad: no leas dominios fuera de los permitidos por mcpdoc; no uses comodín salvo que el usuario lo pida.
+Cuando la consulta o el cambio de código trate de LangChain/LangGraph (p. ej., LCEL, Runnables, retrievers, vector stores como Chroma/FAISS, LangSmith, callbacks, memory, LangGraph nodes/edges/checkpointing), usa el MCP server "langchain-docs-mcp" para fundamentar la respuesta.
+
+Flujo:
+1) Llama la herramienta `list_doc_sources` para ver las fuentes disponibles (los llms.txt).
+2) Llama `fetch_docs` sobre el/los llms.txt y examina las URLs/ancoras listadas.
+3) Elige y vuelve a llamar `fetch_docs` SOLO en las secciones que respondan a la pregunta actual.
+4) Redacta la respuesta apoyándote en esas secciones. Incluye al final las URLs exactas que usaste.
+5) Por defecto, da ejemplos en TypeScript para Node.js; si el usuario pide Python, cambia a Python.
+
+Criterios de activación (usa MCP SOLO si aplica):
+- El prompt menciona LangChain, LangGraph, LCEL, Runnable*, retriever, tool calling en LangChain, integración con OpenAI/Anthropic, orquestación con LangGraph, o dudas de configuración/versión de estas libs.
+- Estás escribiendo o corrigiendo código que importa `langchain`, `@langchain/*`, `langgraph`, `@langchain/langgraph`, o integra vector stores/adapters de LangChain.
+
+Políticas:
+- No inventes APIs: si la sección no aparece en docs, dilo y sugiere buscar otra fuente.
+- Respeta versiones: si el llms.txt incluye notas de versión, adhiérete a ellas.
+- Seguridad: no leas dominios fuera de los permitidos por mcpdoc; no uses comodín salvo que el usuario lo pida.

@@ -5,6 +5,24 @@
       "args": [
         "chroma-mcp"
       ]
+    },
+    "langchain-docs-mcp": {
+      "command": "uvx",
+      "args": [
+        "--from",
+        "mcpdoc",
+        "mcpdoc",
+        "--urls",
+        "LangChainPy:https://python.langchain.com/llms.txt",
+        "--urls",
+        "LangChainJS:https://js.langchain.com/llms.txt",
+        "--urls",
+        "LangGraphPy:https://langchain-ai.github.io/langgraph/llms.txt",
+        "--urls",
+        "LangGraphJS:https://langchain-ai.github.io/langgraphjs/llms.txt",
+        "--transport",
+        "stdio"
+      ]
     }
   }
 }
