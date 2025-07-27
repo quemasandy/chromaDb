@@ -238,6 +238,7 @@ Thumbs.db
 
 # ignore the db folder in root only
 /db/
+langChain/db
 
 # ignore the vector-databases-course folder
 vector-databases-course/
