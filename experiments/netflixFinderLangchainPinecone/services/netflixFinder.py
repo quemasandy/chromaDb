@@ -1,25 +1,19 @@
-import logging  # Importa el módulo estándar para logging y seguimiento de eventos
 import os  # Importa el módulo estándar para operaciones del sistema y variables de entorno
-from pathlib import Path  # Importa Path para manipulación de rutas de archivos de manera orientada a objetos
+import logging  # Importa el módulo estándar para logging y seguimiento de eventos
+from typing import Dict, Any  # Importa tipos para anotaciones de funciones y variables
 
-from typing import Dict, List, Optional, Any, Union  # Importa tipos para anotaciones de funciones y variables
-
-import chromadb  # Importa la librería ChromaDB para operaciones de base de datos vectorial
-from chromadb.utils import embedding_functions  # Importa utilidades para funciones de embedding de ChromaDB
 from dotenv import load_dotenv  # Importa la función para cargar variables de entorno desde un archivo .env
-# Permite la creación de plantillas de prompts para chat
-from langchain_core.prompts import ChatPromptTemplate
-# Permite combinar documentos para cadenas de procesamiento
-from langchain.chains.combine_documents import create_stuff_documents_chain
-# Permite crear cadenas de recuperación de información
-from langchain.chains import create_retrieval_chain
-# Permite integrar Pinecone con LangChain para almacenamiento vectorial
-from langchain_pinecone import PineconeVectorStore
-# Permite la interacción con modelos de lenguaje de OpenAI
-from langchain_openai import ChatOpenAI
-from langchain_openai import OpenAIEmbeddings  # Import OpenAI embeddings for text vectorization
-# Permite la interacción con la base de datos vectorial Pinecone y la configuración serverless
-from pinecone import Pinecone, ServerlessSpec
+
+from pinecone import Pinecone  # Permite la interacción con la base de datos vectorial Pinecone
+
+from langchain_openai import ChatOpenAI  # Permite la interacción con modelos de lenguaje de OpenAI
+from langchain_openai import OpenAIEmbeddings  # Importa embeddings de OpenAI para vectorización de texto
+
+from langchain_pinecone import PineconeVectorStore  # Permite integrar Pinecone con LangChain para almacenamiento vectorial
+
+from langchain_core.prompts import ChatPromptTemplate  # Permite la creación de plantillas de prompts para chat
+from langchain.chains.combine_documents import create_stuff_documents_chain  # Permite combinar documentos para cadenas de procesamiento
+from langchain.chains import create_retrieval_chain  # Permite crear cadenas de recuperación de información
 
 # Load environment variables from .env file
 load_dotenv()

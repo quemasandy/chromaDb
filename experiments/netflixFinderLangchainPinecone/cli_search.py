@@ -3,41 +3,59 @@
 NetflixFinder CLI - Command Line Interface for searching Netflix content.
 
 This program provides an interactive interface to search for movies and series
-using the NetflixFinder service with optional filters.
+using the NetflixFinder service with semantic search.
 """
 
-import sys
-import logging
-from typing import Optional, List
-from pathlib import Path
+import sys  # Importa el módulo estándar para operaciones del sistema y argumentos de línea de comandos
+import os  # Importa el módulo estándar para operaciones del sistema y variables de entorno
+import logging  # Importa el módulo estándar para logging y seguimiento de eventos
+from typing import Optional, List, Dict, Any  # Importa tipos para anotaciones de funciones y variables
+from pathlib import Path  # Importa Path para manipulación de rutas de archivos
 
 # Add the services directory to the path to import NetflixFinderService
-sys.path.append(str(Path(__file__).parent / "services"))
+sys.path.append(str(Path(__file__).parent / "services"))  # Agrega el directorio de servicios al path para importar NetflixFinderService
 
-from services.netflixFinder import NetflixFinderService
+from services.netflixFinder import NetflixFinderService  # Importa el servicio de búsqueda de Netflix
+from langchain_openai import ChatOpenAI  # Importa el modelo de chat de OpenAI para procesamiento de lenguaje natural
+from dotenv import load_dotenv  # Importa la función para cargar variables de entorno desde un archivo .env
+
+# Load environment variables from .env file
+load_dotenv()  # Carga las variables de entorno desde el archivo .env
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s'
+    level=logging.INFO,  # Establece el nivel de logging en INFO para mostrar mensajes informativos
+    format='%(asctime)s - %(levelname)s - %(message)s'  # Define el formato de los mensajes de log
 )
-logger = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)  # Crea un logger específico para este módulo
 
 class NetflixFinderCLI:
     """
     Command Line Interface for NetflixFinder service.
     
-    Provides interactive prompts for search queries and filters.
+    Provides interactive prompts for search queries with semantic search capabilities.
     """
     
     def __init__(self):
         """Initialize the CLI with NetflixFinder service."""
         try:
-            self.finder = NetflixFinderService()
-            print("✅ NetflixFinder CLI initialized successfully!")
+            # Get OpenAI API key from environment variables
+            openai_api_key = os.getenv("OPENAI_API_KEY")  # Obtiene la clave de API de OpenAI desde las variables de entorno
+            if not openai_api_key:  # Verifica si la clave de API existe
+                raise ValueError("OPENAI_API_KEY not found in environment variables")  # Lanza un error si no se encuentra la clave
+            
+            # Initialize the language model for processing
+            llm = ChatOpenAI(api_key=openai_api_key, model="gpt-4")  # Inicializa el modelo de lenguaje GPT-4 para procesamiento
+            
+            # Define the Pinecone index name for the vector database
+            index_name = "streaming-content"  # Define el nombre del índice en Pinecone donde están almacenados los datos de películas
+            
+            # Initialize the NetflixFinder service with required parameters
+            self.finder = NetflixFinderService(llm=llm, index_name=index_name)  # Inicializa el servicio con el modelo de lenguaje y el nombre del índice
+            print("✅ NetflixFinder CLI initialized successfully!")  # Imprime mensaje de éxito al inicializar
         except Exception as e:
-            print(f"❌ Error initializing NetflixFinder service: {e}")
-            sys.exit(1)
+            print(f"❌ Error initializing NetflixFinder service: {e}")  # Imprime mensaje de error si falla la inicialización
+            sys.exit(1)  # Termina el programa con código de error
     
     def get_user_input(self, prompt: str, default: str = "") -> str:
         """
@@ -50,272 +68,136 @@ class NetflixFinderCLI:
         Returns:
             User input or default value
         """
-        if default:
-            user_input = input(f"{prompt} (default: {default}): ").strip()
-            return user_input if user_input else default
+        if default:  # Si hay un valor por defecto disponible
+            user_input = input(f"{prompt} (default: {default}): ").strip()  # Solicita entrada del usuario mostrando el valor por defecto
+            return user_input if user_input else default  # Retorna la entrada del usuario o el valor por defecto si está vacío
         else:
-            return input(f"{prompt}: ").strip()
+            return input(f"{prompt}: ").strip()  # Solicita entrada del usuario sin valor por defecto
     
-    def get_optional_float(self, prompt: str) -> Optional[float]:
+    def get_optional_int(self, prompt: str, default: int = 5) -> int:
         """
-        Get optional float input from user.
+        Get optional integer input from user with default value.
         
         Args:
             prompt: The prompt to show to the user
+            default: Default integer value
             
         Returns:
-            Float value or None if user presses Enter
+            Integer value or default if user presses Enter
         """
-        user_input = self.get_user_input(prompt)
-        if not user_input:
-            return None
+        user_input = self.get_user_input(prompt, str(default))  # Solicita entrada del usuario con valor por defecto convertido a string
         try:
-            return float(user_input)
+            return int(user_input)  # Intenta convertir la entrada a entero
         except ValueError:
-            print("❌ Invalid number format. Please enter a valid number.")
-            return self.get_optional_float(prompt)
+            print(f"❌ Invalid number format. Using default value: {default}")  # Imprime mensaje de error si la conversión falla
+            return default  # Retorna el valor por defecto en caso de error
     
-    def get_optional_int(self, prompt: str) -> Optional[int]:
+    def display_search_results(self, results: Dict[str, Any], query: str) -> None:
         """
-        Get optional integer input from user.
+        Display search results in a formatted way showing context movies and LLM answer.
         
         Args:
-            prompt: The prompt to show to the user
-            
-        Returns:
-            Integer value or None if user presses Enter
-        """
-        user_input = self.get_user_input(prompt)
-        if not user_input:
-            return None
-        try:
-            return int(user_input)
-        except ValueError:
-            print("❌ Invalid number format. Please enter a valid integer.")
-            return self.get_optional_int(prompt)
-    
-    def get_optional_list(self, prompt: str) -> Optional[List[str]]:
-        """
-        Get optional list input from user (comma-separated).
-        
-        Args:
-            prompt: The prompt to show to the user
-            
-        Returns:
-            List of strings or None if user presses Enter
-        """
-        user_input = self.get_user_input(prompt)
-        if not user_input:
-            return None
-        # Split by comma and strip whitespace
-        return [item.strip() for item in user_input.split(",") if item.strip()]
-    
-    def get_optional_date(self, prompt: str) -> Optional[str]:
-        """
-        Get optional date input from user (YYYY-MM-DD format).
-        
-        Args:
-            prompt: The prompt to show to the user
-            
-        Returns:
-            Date string or None if user presses Enter
-        """
-        user_input = self.get_user_input(prompt)
-        if not user_input:
-            return None
-        # Basic date format validation
-        if len(user_input) == 10 and user_input[4] == '-' and user_input[7] == '-':
-            try:
-                year, month, day = user_input.split('-')
-                int(year), int(month), int(day)
-                return user_input
-            except ValueError:
-                pass
-        print("❌ Invalid date format. Please use YYYY-MM-DD format (e.g., 2020-01-15)")
-        return self.get_optional_date(prompt)
-    
-    def collect_search_filters(self) -> dict:
-        """
-        Collect search filters from user through interactive prompts.
-        
-        Returns:
-            Dictionary with search parameters
-        """
-        print("\n" + "="*60)
-        print("🔍 SEARCH FILTERS")
-        print("="*60)
-        print("Press Enter to skip any filter (search all content)")
-        print()
-        
-        filters = {}
-        
-        # Date range filters
-        print("📅 DATE RANGE FILTERS:")
-        filters['release_date_start'] = self.get_optional_date("Start date (YYYY-MM-DD)")
-        filters['release_date_end'] = self.get_optional_date("End date (YYYY-MM-DD)")
-        
-        # Rating filters
-        print("\n⭐ RATING FILTERS:")
-        filters['vote_average_min'] = self.get_optional_float("Minimum vote average (0-10)")
-        filters['vote_average_max'] = self.get_optional_float("Maximum vote average (0-10)")
-        
-        # Vote count filters
-        print("\n📊 VOTE COUNT FILTERS:")
-        filters['vote_count_min'] = self.get_optional_int("Minimum vote count")
-        filters['vote_count_max'] = self.get_optional_int("Maximum vote count")
-        
-        # Popularity filters
-        print("\n🔥 POPULARITY FILTERS:")
-        filters['popularity_min'] = self.get_optional_float("Minimum popularity")
-        filters['popularity_max'] = self.get_optional_float("Maximum popularity")
-        
-        # Genre filter
-        print("\n🎭 GENRE FILTER:")
-        print("Enter genres separated by commas (e.g., Action, Thriller, Drama)")
-        filters['genres'] = self.get_optional_list("Genres")
-        
-        # Content type filter
-        print("\n📺 CONTENT TYPE FILTER:")
-        filters['content_type'] = self.get_user_input("Content type (movie/series)", "")
-        if filters['content_type'] and filters['content_type'].lower() not in ['movie', 'series']:
-            print("⚠️  Invalid content type. Using 'movie' as default.")
-            filters['content_type'] = 'movie'
-        
-        # Number of results
-        print("\n📋 RESULTS:")
-        n_results_input = self.get_user_input("Number of results to show", "5")
-        try:
-            filters['n_results'] = int(n_results_input)
-        except ValueError:
-            print("⚠️  Invalid number. Using 5 as default.")
-            filters['n_results'] = 5
-        
-        return filters
-    
-    def display_search_results(self, results: dict, query: str) -> None:
-        """
-        Display search results in a formatted way.
-        
-        Args:
-            results: Search results from NetflixFinder service
+            results: Search results from NetflixFinder service containing context and answer
             query: Original search query
         """
-        print("\n" + "="*60)
-        print(f"🎬 SEARCH RESULTS FOR: '{query}'")
-        print("="*60)
+        print("\n" + "="*60)  # Imprime separador visual para los resultados
+        print(f"🎬 SEARCH RESULTS FOR: '{query}'")  # Imprime el encabezado con la consulta original
+        print("="*60)  # Imprime línea separadora
         
-        if not results['ids']:
-            print("❌ No results found for your search criteria.")
+        # Display movies found in context
+        context_movies = results.get('context', [])  # Obtiene la lista de películas del contexto de resultados
+        if not context_movies:  # Verifica si no hay películas en el contexto
+            print("❌ No movies found in context for your search criteria.")  # Imprime mensaje de no resultados
             return
         
-        print(f"✅ Found {len(results['ids'])} results\n")
+        print(f"✅ Found {len(context_movies)} movies in context\n")  # Imprime el número de películas encontradas
         
-        for i, (doc_id, doc, metadata, distance) in enumerate(zip(
-            results['ids'], 
-            results['documents'], 
-            results['metadatas'], 
-            results['distances']
-        ), 1):
-            print(f"🎯 RESULT {i} (Similarity: {(1-distance)*100:.1f}%)")
-            print(f"   ID: {doc_id}")
-            print(f"   Title: {metadata.get('title', 'N/A')}")
-            print(f"   Original Title: {metadata.get('original_title', 'N/A')}")
-            print(f"   Release Date: {metadata.get('release_date', 'N/A')}")
-            print(f"   Rating: {metadata.get('vote_average', 'N/A')}/10 ({metadata.get('vote_count', 'N/A')} votes)")
-            print(f"   Popularity: {metadata.get('popularity', 'N/A')}")
-            print(f"   Genres: {metadata.get('genres', 'N/A')}")
-            print(f"   Language: {metadata.get('original_language', 'N/A')}")
-            print(f"   Overview: {metadata.get('overview', 'N/A')[:150]}...")
-            if metadata.get('poster_url'):
-                print(f"   Poster: {metadata.get('poster_url', 'N/A')}")
-            print()
-    
-    def show_collection_stats(self) -> None:
-        """Display collection statistics."""
-        try:
-            stats = self.finder.get_collection_stats()
-            print("\n" + "="*60)
-            print("📊 COLLECTION STATISTICS")
-            print("="*60)
-            print(f"Total documents: {stats['total_documents']}")
-            print(f"Content types: {stats['content_types']}")
-            print(f"Top genres: {stats['top_genres']}")
-        except Exception as e:
-            print(f"❌ Error getting collection stats: {e}")
+        print("📽️  MOVIES IN CONTEXT:")  # Imprime encabezado para las películas en contexto
+        print("-" * 40)  # Imprime línea separadora
+        
+        # Iterate through each movie in the context and display its information
+        for i, doc in enumerate(context_movies, 1):  # Itera sobre cada documento de película en el contexto
+            title = doc.metadata.get('title', 'Unknown Title')  # Obtiene el título de la película o un valor por defecto
+            poster_url = doc.metadata.get('poster_url', 'No poster URL available')  # Obtiene la URL del póster o un valor por defecto
+            overview = doc.metadata.get('overview', 'No overview available')  # Obtiene la sinopsis de la película o un valor por defecto
+            release_date = doc.metadata.get('release_date', 'N/A')  # Obtiene la fecha de lanzamiento o un valor por defecto
+            vote_average = doc.metadata.get('vote_average', 'N/A')  # Obtiene la calificación promedio o un valor por defecto
+            genres = doc.metadata.get('genres', 'N/A')  # Obtiene los géneros de la película o un valor por defecto
+            
+            print(f"🎯 MOVIE {i}:")  # Imprime el número de la película
+            print(f"   Title: {title}")  # Imprime el título de la película
+            print(f"   Release Date: {release_date}")  # Imprime la fecha de lanzamiento
+            print(f"   Rating: {vote_average}/10")  # Imprime la calificación
+            print(f"   Genres: {genres}")  # Imprime los géneros
+            print(f"   Overview: {overview[:150]}{'...' if len(overview) > 150 else ''}")  # Imprime una versión truncada de la sinopsis
+            print(f"   Poster URL: {poster_url}")  # Imprime la URL del póster
+            print("-" * 40)  # Imprime línea separadora entre películas
+        
+        # Display the LLM-generated recommendation answer
+        print("\n🤖 AI RECOMMENDATION ANALYSIS:")  # Imprime encabezado para el análisis de IA
+        print("="*60)  # Imprime línea separadora
+        llm_answer = results.get('answer', 'No recommendation analysis available')  # Obtiene la respuesta del modelo de lenguaje
+        print(llm_answer)  # Imprime la respuesta generada por el modelo de IA
+        print("="*60)  # Imprime línea separadora final
     
     def run(self) -> None:
         """
-        Main CLI loop.
+        Main CLI loop for interactive movie search.
         """
-        print("🎬 NETFLIX FINDER CLI")
-        print("="*60)
-        print("Welcome to NetflixFinder! Search for movies and series with semantic search.")
-        print("="*60)
+        print("🎬 NETFLIX FINDER CLI")  # Imprime el título de la aplicación CLI
+        print("="*60)  # Imprime línea separadora
+        print("Welcome to NetflixFinder! Search for movies and series with AI-powered semantic search.")  # Imprime mensaje de bienvenida
+        print("="*60)  # Imprime línea separadora
         
-        while True:
+        while True:  # Inicia el bucle principal de la interfaz
             try:
-                # Get search query
-                print("\n" + "="*60)
-                query = self.get_user_input("What do you want to see ?")
+                # Get search query from user
+                print("\n" + "="*60)  # Imprime separador visual para nueva búsqueda
+                query = self.get_user_input("What kind of movie or series do you want to watch?")  # Solicita la consulta de búsqueda al usuario
                 
-                if not query:
-                    print("❌ Please enter a search query.")
-                    continue
+                if not query:  # Verifica si el usuario no ingresó una consulta
+                    print("❌ Please enter a search query.")  # Imprime mensaje de error para consulta vacía
+                    continue  # Continúa al siguiente ciclo del bucle
                 
-                # Collect filters
-                filters = self.collect_search_filters()
+                # Perform search using the simplified API
+                print(f"\n🔍 Searching for: '{query}'")  # Imprime mensaje indicando que se está realizando la búsqueda
+                print("Please wait while our AI analyzes your request...")  # Imprime mensaje de espera mientras se procesa
                 
-                # Perform search
-                print(f"\n🔍 Searching for: '{query}'")
-                print("Please wait...")
+                # Call the search service with only the query parameter
+                results = self.finder.search_content(query=query)  # Ejecuta la búsqueda usando solo la consulta como parámetro
                 
-                results = self.finder.search_content(
-                    query=query,
-                    n_results=filters['n_results'],
-                    release_date_start=filters['release_date_start'],
-                    release_date_end=filters['release_date_end'],
-                    vote_average_min=filters['vote_average_min'],
-                    vote_average_max=filters['vote_average_max'],
-                    vote_count_min=filters['vote_count_min'],
-                    vote_count_max=filters['vote_count_max'],
-                    popularity_min=filters['popularity_min'],
-                    popularity_max=filters['popularity_max'],
-                    genres=filters['genres'],
-                    content_type=filters['content_type']
-                )
+                # Display the search results
+                self.display_search_results(results, query)  # Muestra los resultados de la búsqueda formateados
                 
-                # Display results
-                self.display_search_results(results, query)
-                
-                # Ask if user wants to continue
-                print("\n" + "="*60)
-                continue_search = self.get_user_input("Search again? (y/n)", "y").lower()
-                if continue_search not in ['y', 'yes', '']:
-                    break
+                # Ask if user wants to continue searching
+                print("\n" + "="*60)  # Imprime separador para opciones de continuación
+                continue_search = self.get_user_input("Would you like to search for something else? (y/n)", "y").lower()  # Pregunta si el usuario quiere continuar buscando
+                if continue_search not in ['y', 'yes', '']:  # Verifica si el usuario no quiere continuar
+                    break  # Sale del bucle principal
                 
             except KeyboardInterrupt:
-                print("\n\n👋 Goodbye!")
-                break
+                print("\n\n👋 Goodbye! Thanks for using NetflixFinder!")  # Maneja la interrupción del teclado con mensaje de despedida
+                break  # Sale del bucle principal
             except Exception as e:
-                print(f"\n❌ Error during search: {e}")
-                continue_search = self.get_user_input("Try again? (y/n)", "y").lower()
-                if continue_search not in ['y', 'yes', '']:
-                    break
+                print(f"\n❌ Error during search: {e}")  # Imprime mensaje de error si ocurre una excepción
+                logger.error(f"Search error: {e}")  # Registra el error en el log
+                continue_search = self.get_user_input("An error occurred. Try again? (y/n)", "y").lower()  # Pregunta si el usuario quiere intentar de nuevo
+                if continue_search not in ['y', 'yes', '']:  # Verifica si el usuario no quiere continuar
+                    break  # Sale del bucle principal
         
-        # Show final statistics
-        self.show_collection_stats()
-        print("\n👋 Thanks for using NetflixFinder CLI!")
+        print("\n👋 Thanks for using NetflixFinder CLI! Happy watching! 🍿")  # Imprime mensaje final de despedida
 
 def main():
-    """Main entry point for the CLI."""
+    """Main entry point for the CLI application."""
     try:
-        cli = NetflixFinderCLI()
-        cli.run()
+        cli = NetflixFinderCLI()  # Crea una instancia de la interfaz CLI
+        cli.run()  # Ejecuta el bucle principal de la interfaz
     except KeyboardInterrupt:
-        print("\n\n👋 Goodbye!")
+        print("\n\n👋 Goodbye!")  # Maneja la interrupción del teclado con mensaje de despedida
     except Exception as e:
-        print(f"\n❌ Fatal error: {e}")
-        sys.exit(1)
+        print(f"\n❌ Fatal error: {e}")  # Imprime mensaje de error fatal
+        logger.error(f"Fatal error: {e}")  # Registra el error fatal en el log
+        sys.exit(1)  # Termina el programa con código de error
 
 if __name__ == "__main__":
-    main() 
+    main()  # Ejecuta la función principal si el script se ejecuta directamente 
