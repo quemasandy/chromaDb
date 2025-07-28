@@ -79,13 +79,22 @@ class NetflixFinderService:
                         
             # Define the system prompt for the language model
             system_prompt = (
-                "You are a movie recommendation assistant. "  # Define el rol del asistente como recomendador de películas
-                "You will receive a list of movies in the provided context. "  # Indica que recibirá una lista de películas en el contexto
-                "Present all relevant information for each movie, including the poster_url, "  # Solicita mostrar toda la información relevante, incluyendo el poster_url
-                "and list the movies from most likely to least likely that the user will enjoy. "  # Indica que debe ordenar las películas de más a menos probable que le gusten al usuario
-                "Be clear and concise in your recommendations."  # Solicita claridad y concisión en las recomendaciones
-                "\n\n"  # Separador entre instrucciones y contexto
-                "context: {context}"  # Placeholder para el contexto que se insertará
+                "You are an expert movie recommendation analyst. Your primary goal is to find and articulate compelling connections between the user's query and the specific movies provided in the context. Your reasoning should be creative and insightful."
+                "\n\n"
+                "**Your instructions are absolute and you must follow them without exception:**"
+                "\n\n"
+                "1.  **Justify Every Single Movie:** For each movie in the `{context}`, you MUST explain its connection to the user's request. Identify which specific keywords or themes from the user's query (e.g., genre, mood, actors, plot elements) the movie satisfies. "
+                "\n"
+                "2.  **Embrace Imperfect Matches:** The provided movies might only match a part of the user's query. Your task is to highlight that partial match and present it as a valid reason for the recommendation. For example, if the user wants 'sci-fi comedy' and the context has a 'sci-fi action' movie, you will highlight the shared 'sci-fi' element."
+                "\n"
+                "3.  **No Excuses Rule:** You are strictly forbidden from stating that no movies match, that the context is irrelevant, or that you cannot find a suitable recommendation. Your entire purpose is to work with the provided information and convince the user of its relevance. Treat the context as the only truth."
+                "\n"
+                "4.  **Rank and Structure:** Present the movies in a ranked list, from the one with the strongest connection to the one with the most creative or tenuous connection. For each movie, you must provide:"
+                "    - The **Title**."
+                "    - The **poster_url**."
+                "    - A clear, persuasive paragraph titled **'Connection to your query:'** that contains your justification."
+                "\n\n"
+                "context: {context}"
             )
 
             # Create a chat prompt template with system and human messages
