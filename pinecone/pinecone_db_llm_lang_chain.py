@@ -18,7 +18,6 @@ from langchain_community.document_loaders import TextLoader  # Permite cargar ar
 from langchain_text_splitters import RecursiveCharacterTextSplitter  # Permite dividir documentos en fragmentos de texto
 
 # Import LangChain modules for vector store and retrieval chains
-from langchain_community.vectorstores import Chroma  # Permite el almacenamiento y recuperación de vectores usando Chroma
 from langchain_core.prompts import ChatPromptTemplate  # Permite la creación de plantillas de prompts para chat
 from langchain.chains.combine_documents import create_stuff_documents_chain  # Permite combinar documentos para cadenas de procesamiento
 from langchain.chains import create_retrieval_chain  # Permite crear cadenas de recuperación de información
