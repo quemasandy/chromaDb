@@ -112,7 +112,7 @@ def main() -> None:
             logger.info(f"Index {index_name} already exists")
 
         # Define CSV file path
-        csv_file_path = Path(__file__).parent / "netflix_movies_test.csv"
+        csv_file_path = Path(__file__).parent / "netflix_movies.csv"
         
         # Check if CSV file exists
         if not csv_file_path.exists():
