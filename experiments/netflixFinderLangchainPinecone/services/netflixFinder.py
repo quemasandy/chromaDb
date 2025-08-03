@@ -54,6 +54,11 @@ class NetflixFinderService:
             api_key=openai_api_key,  # Use OpenAI API key for authentication
             model="text-embedding-3-small"  # Specify the embedding model to use
         )
+
+            self.embeddings = ClaudeAIEmbeddings(
+                api_key=openai_api_key,  # Use OpenAI API key for authentication
+                model="text-embedding-3-small"  # Specify the embedding model to use
+            )
         
         # Create PineconeVectorStore for retrieval
         self.vector_store = PineconeVectorStore(
