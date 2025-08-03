@@ -108,11 +108,16 @@ hypothetical_answer = augment_query_generated(original_query)
 joint_query = f"{original_query} {hypothetical_answer}"
 print(word_wrap(joint_query))
 
+# e results
 results = chroma_collection.query(
     query_texts=joint_query, n_results=5, include=["documents", "embeddings"]
 )
 retrieved_documents = results["documents"][0]
 
+# r results
+# results = chroma_collection.query(
+#     query_texts=original_query, n_results=5, include=["documents", "embeddings"]
+# )
 
 for doc in retrieved_documents:
     print(word_wrap(doc))
