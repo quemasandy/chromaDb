@@ -8,11 +8,7 @@ import os
 from openai import OpenAI
 # Importamos load_dotenv para cargar variables de entorno desde archivo .env
 from dotenv import load_dotenv
-
-# Importación duplicada de PdfReader (línea redundante que se puede eliminar)
-from pypdf import PdfReader
 # Importamos específicamente la clase UMAP para reducción de dimensionalidad
-# Fix the UMAP import - import the UMAP class specifically
 from umap import UMAP
 
 
@@ -228,6 +224,9 @@ embeddings = chroma_collection.get(include=["embeddings"])["embeddings"]
 umap_transform = UMAP(random_state=0, transform_seed=0).fit(embeddings)
 # Proyectamos todos los embeddings del dataset usando la transformación UMAP
 # Esto convierte los vectores de alta dimensión en coordenadas 2D
+# Esta línea aplica la transformación UMAP a los embeddings originales para reducir su dimensionalidad 
+# y obtener sus coordenadas en 2D, lo que facilita su visualización y análisis en el espacio reducido
+# projected_embeddings = umap_transform.transform(embeddings)
 projected_dataset_embeddings = project_embeddings(embeddings, umap_transform)
 
 
