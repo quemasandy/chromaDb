@@ -49,6 +49,7 @@ from chromadb.utils import embedding_functions
 
 embedding_function = embedding_functions.OpenAIEmbeddingFunction(
     api_key=openai_key,  # Pass API key for authentication
+    # model_name="text-embedding-3-small"  # Specify embedding model to use
     model_name="text-embedding-3-large"  # Specify embedding model to use
 )
 
@@ -73,7 +74,8 @@ for document in retrieved_documents:
     print("\n")
 
 
-def augment_query_generated(query, model="gpt-4o"):
+# def augment_query_generated(query, model="gpt-4o"):
+def augment_query_generated(query, model="gpt-3.5-turbo"):
     prompt = """You are a helpful expert financial research assistant. 
    Provide an example answer to the given question, that might be found in a document like an annual report."""
     messages = [
