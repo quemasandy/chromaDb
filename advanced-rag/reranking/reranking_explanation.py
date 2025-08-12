@@ -9,8 +9,6 @@ from openai import OpenAI
 # Importamos dotenv para cargar variables de entorno
 from dotenv import load_dotenv
 
-# Importamos PdfReader nuevamente (redundante, se puede eliminar)
-from pypdf import PdfReader
 # Importamos numpy para operaciones matemáticas
 import numpy as np
 
@@ -97,7 +95,7 @@ results = chroma_collection.query(
 retrieved_documents = results["documents"][0]
 
 # Imprimimos cada documento recuperado con formato de envoltura de palabras
-for document in results["documents"][0]:
+for document in retrieved_documents:
     print(word_wrap(document))
     print("")
 
